@@ -80,4 +80,4 @@ func _get_advice(reason: String) -> String:
 
 
 func _on_start_button_pressed() -> void:
-	pass # Replace with function body.
+	start_hiking()
