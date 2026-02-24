@@ -38,8 +38,8 @@ func _refresh_bars() -> void:
 	if _player_stats == null:
 		return
 
-	var st := _player_stats.get_stamina_ratio()
-	var hy := _player_stats.get_hydration_ratio()
+	var st: float = _player_stats.get_stamina_ratio()
+	var hy: float = _player_stats.get_hydration_ratio()
 
 	stamina_bar.value   = st * 100.0
 	hydration_bar.value = hy * 100.0

@@ -43,7 +43,7 @@ func start_hiking() -> void:
 
 	# MVP: 入門コースのタイル（高尾山付近）を読み込む
 	# ズーム15, 緯度35.6252, 経度139.2437
-	var tile := terrain_generator.latlon_to_tile(35.6252, 139.2437, 15)
+	var tile: Vector2i = terrain_generator.latlon_to_tile(35.6252, 139.2437, 15)
 	terrain_generator.generate_from_tile(15, tile.x, tile.y)
 
 
