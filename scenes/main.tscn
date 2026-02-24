@@ -1,0 +1,102 @@
+[gd_scene format=3 uid="uid://jh7rnyw1dfyj"]
+
+[ext_resource type="Script" uid="uid://cmh83cq1ilbdv" path="res://scripts/main.gd" id="1_tbgi4"]
+[ext_resource type="Script" uid="uid://ch4wo6bkcira4" path="res://scripts/ui/hud.gd" id="2_tefeu"]
+[ext_resource type="Script" uid="uid://dd5vbnka8a8ms" path="res://scripts/player/player.gd" id="3_o6xl0"]
+[ext_resource type="Script" uid="uid://bd7pxim5wde3i" path="res://scripts/player/player_stats.gd" id="4_tipki"]
+[ext_resource type="Script" uid="uid://b64v2vd8id27p" path="res://tests/unit/test_terrain_generator.gd" id="5_85g3d"]
+
+[node name="Main" type="Node" unique_id=259921773]
+script = ExtResource("1_tbgi4")
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1384634494]
+script = ExtResource("2_tefeu")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD" unique_id=1544846709]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="StaminaRow" type="HBoxContainer" parent="HUD/VBoxContainer" unique_id=795167153]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HUD/VBoxContainer/StaminaRow" unique_id=1383997420]
+layout_mode = 2
+text = "体力"
+
+[node name="StaminaBar" type="ProgressBar" parent="HUD/VBoxContainer/StaminaRow" unique_id=504727664]
+layout_mode = 2
+value = 100.0
+
+[node name="HydrationRow" type="HBoxContainer" parent="HUD/VBoxContainer" unique_id=1562467412]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HUD/VBoxContainer/HydrationRow" unique_id=1613966246]
+layout_mode = 2
+text = "水分"
+
+[node name="HydrationBar" type="ProgressBar" parent="HUD/VBoxContainer/HydrationRow" unique_id=1765827482]
+layout_mode = 2
+value = 100.0
+
+[node name="WarningLabel" type="Label" parent="HUD" unique_id=2025915369]
+offset_top = 27.0
+offset_right = 32.0
+offset_bottom = 50.0
+
+[node name="TimeLabel" type="Label" parent="HUD" unique_id=1498987314]
+offset_top = 54.0
+offset_right = 32.0
+offset_bottom = 77.0
+text = "06:00"
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=20241927]
+script = ExtResource("3_o6xl0")
+
+[node name="PlayerStats" type="Node" parent="Player" unique_id=1603626587]
+script = ExtResource("4_tipki")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=460238899]
+
+[node name="CameraPivot" type="Node3D" parent="Player" unique_id=621228350]
+
+[node name="Camera3D" type="Camera3D" parent="Player/CameraPivot" unique_id=1629720591]
+
+[node name="SlopeCast" type="RayCast3D" parent="Player" unique_id=1034746741]
+
+[node name="TerrainGenerator" type="Node3D" parent="." unique_id=1762648925]
+script = ExtResource("5_85g3d")
+
+[node name="ResultPanel" type="Control" parent="." unique_id=650648112]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TitleLabel" type="Label" parent="ResultPanel" unique_id=406162075]
+layout_mode = 0
+text = "タイトル"
+
+[node name="ReasonLabel" type="Label" parent="ResultPanel" unique_id=1232734604]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 23.0
+text = "理由"
+
+[node name="AdviceLabel" type="Label" parent="ResultPanel" unique_id=2138400413]
+layout_mode = 0
+offset_right = 32.0
+offset_bottom = 23.0
+text = "アドバイス"
+
+[node name="PlanningPanel" type="Control" parent="." unique_id=1397981173]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="StartButton" type="Button" parent="PlanningPanel" unique_id=1007122665]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "出発する"
