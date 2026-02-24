@@ -39,13 +39,21 @@ def fetch_elevation_tile(zoom: int, x: int, y: int) -> list[list[float]] | None:
     """標高タイルCSVを取得してパースする。欠損値('e')は None で返す。"""
     url = GSI_URL.format(z=zoom, x=x, y=y)
     print(f"  取得中: {url}")
-    resp = requests.get(url, timeout=10)
+    try:
+        resp = requests.get(url, timeout=10)
+    except requests.exceptions.RequestException as e:
+        print(f"  [ERROR] リクエスト失敗: {e}", file=sys.stderr)
+        return None
 
     if resp.status_code == 404:
         # dem5a がない場合は低解像度 dem にフォールバック
         url = FALLBACK_URL.format(z=zoom, x=x, y=y)
         print(f"  フォールバック: {url}")
-        resp = requests.get(url, timeout=10)
+        try:
+            resp = requests.get(url, timeout=10)
+        except requests.exceptions.RequestException as e:
+            print(f"  [ERROR] フォールバックリクエスト失敗: {e}", file=sys.stderr)
+            return None
 
     if resp.status_code != 200:
         print(f"  [ERROR] HTTP {resp.status_code}", file=sys.stderr)
