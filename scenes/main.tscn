@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://ch4wo6bkcira4" path="res://scripts/ui/hud.gd" id="2_tefeu"]
 [ext_resource type="Script" uid="uid://dd5vbnka8a8ms" path="res://scripts/player/player.gd" id="3_o6xl0"]
 [ext_resource type="Script" uid="uid://bd7pxim5wde3i" path="res://scripts/player/player_stats.gd" id="4_tipki"]
-[ext_resource type="Script" uid="uid://b64v2vd8id27p" path="res://tests/unit/test_terrain_generator.gd" id="5_85g3d"]
+[ext_resource type="Script" uid="uid://dcnd4mby6vbs1" path="res://scripts/terrain/terrain_generator.gd" id="5_tbgi4"]
 
 [node name="Main" type="Node" unique_id=259921773]
 script = ExtResource("1_tbgi4")
@@ -62,9 +62,10 @@ script = ExtResource("4_tipki")
 [node name="Camera3D" type="Camera3D" parent="Player/CameraPivot" unique_id=1629720591]
 
 [node name="SlopeCast" type="RayCast3D" parent="Player" unique_id=1034746741]
+target_position = Vector3(0, -1.2, 0)
 
 [node name="TerrainGenerator" type="Node3D" parent="." unique_id=1762648925]
-script = ExtResource("5_85g3d")
+script = ExtResource("5_tbgi4")
 
 [node name="ResultPanel" type="Control" parent="." unique_id=650648112]
 visible = false
@@ -100,3 +101,5 @@ layout_mode = 0
 offset_right = 8.0
 offset_bottom = 8.0
 text = "出発する"
+
+[connection signal="pressed" from="PlanningPanel/StartButton" to="." method="_on_start_button_pressed"]

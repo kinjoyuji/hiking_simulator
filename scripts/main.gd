@@ -77,3 +77,7 @@ func _get_advice(reason: String) -> String:
 	elif "体力" in reason:
 		return "【振り返り】体力配分は重要です。登りに体力を使いすぎると下山できなくなります。\n「引き返し点」を事前に決め、それ以上消耗した場合は必ず下山しましょう。"
 	return "【振り返り】山では無理をせず、余裕を持った計画を立てることが大切です。"
+
+
+func _on_start_button_pressed() -> void:
+	pass # Replace with function body.
