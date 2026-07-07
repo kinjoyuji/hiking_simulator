@@ -14,7 +14,8 @@ var _current_slope_deg : float = 0.0
 
 
 func _ready() -> void:
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	# 登山道は45°超の斜面もあるため、床判定の許容角度を広げる
+	floor_max_angle = deg_to_rad(60.0)
 	stats.player_downed.connect(_on_player_downed)
 
 
@@ -23,10 +24,13 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_apply_gravity(delta)
-	_handle_movement(delta)
+	var is_moving := _handle_movement()
 	_update_slope()
 
-	stats.apply_drain(delta, _current_slope_deg)
+	if Input.is_action_just_pressed("drink"):
+		stats.drink()
+
+	stats.apply_drain(delta, _current_slope_deg, is_moving)
 	move_and_slide()
 
 
@@ -37,16 +41,19 @@ func _input(event: InputEvent) -> void:
 		camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, -PI / 3, PI / 3)
 
 
-func _handle_movement(delta: float) -> void:
+func _handle_movement() -> bool:
+	"""入力に応じて水平速度を更新し、歩行中かどうかを返す"""
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	if direction:
 		velocity.x = direction.x * WALK_SPEED
 		velocity.z = direction.z * WALK_SPEED
-	else:
-		velocity.x = move_toward(velocity.x, 0, WALK_SPEED)
-		velocity.z = move_toward(velocity.z, 0, WALK_SPEED)
+		return true
+
+	velocity.x = move_toward(velocity.x, 0, WALK_SPEED)
+	velocity.z = move_toward(velocity.z, 0, WALK_SPEED)
+	return false
 
 
 func _apply_gravity(delta: float) -> void:

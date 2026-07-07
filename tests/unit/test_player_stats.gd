@@ -56,8 +56,8 @@ func test_ST07_apply_drain_emits_stats_changed() -> void:
 
 func test_ST08_apply_drain_skipped_when_downed() -> void:
 	stats.is_downed = true
-	var prev_stamina := stats.stamina
-	var prev_hydration := stats.hydration
+	var prev_stamina: float = stats.stamina
+	var prev_hydration: float = stats.hydration
 	stats.apply_drain(100.0, 0.0)
 	assert_eq(stats.stamina, prev_stamina, "ダウン中はstaminaが変化しないこと")
 	assert_eq(stats.hydration, prev_hydration, "ダウン中はhydrationが変化しないこと")
@@ -68,7 +68,7 @@ func test_ST09_dehydration_increases_stamina_drain() -> void:
 	stats.stamina = 100.0
 	stats.hydration = 100.0
 	stats.apply_drain(1.0, 0.0)
-	var stamina_after_hydrated := stats.stamina
+	var stamina_after_hydrated: float = stats.stamina
 
 	# 水分枯渇状態でリセット
 	var stats2 = PlayerStatsScript.new()
@@ -76,7 +76,7 @@ func test_ST09_dehydration_increases_stamina_drain() -> void:
 	stats2.stamina = 100.0
 	stats2.hydration = 0.0
 	stats2.apply_drain(1.0, 0.0)
-	var stamina_after_dehydrated := stats2.stamina
+	var stamina_after_dehydrated: float = stats2.stamina
 
 	assert_lt(stamina_after_dehydrated, stamina_after_hydrated,
 		"水分枯渇時は体力消耗が大きいこと")
@@ -87,13 +87,13 @@ func test_ST10_steeper_slope_increases_stamina_drain() -> void:
 	var s1 = PlayerStatsScript.new()
 	add_child_autofree(s1)
 	s1.apply_drain(1.0, 10.0)
-	var drain_10deg := 100.0 - s1.stamina
+	var drain_10deg: float = 100.0 - s1.stamina
 
 	# 20度
 	var s2 = PlayerStatsScript.new()
 	add_child_autofree(s2)
 	s2.apply_drain(1.0, 20.0)
-	var drain_20deg := 100.0 - s2.stamina
+	var drain_20deg: float = 100.0 - s2.stamina
 
 	assert_gt(drain_20deg, drain_10deg, "傾斜が大きいほど体力消耗が大きいこと")
 
@@ -104,14 +104,14 @@ func test_ST11_heavier_pack_increases_stamina_drain() -> void:
 	add_child_autofree(s1)
 	s1.pack_weight_kg = 5.0
 	s1.apply_drain(1.0, 0.0)
-	var drain_5kg := 100.0 - s1.stamina
+	var drain_5kg: float = 100.0 - s1.stamina
 
 	# 15kg
 	var s2 = PlayerStatsScript.new()
 	add_child_autofree(s2)
 	s2.pack_weight_kg = 15.0
 	s2.apply_drain(1.0, 0.0)
-	var drain_15kg := 100.0 - s2.stamina
+	var drain_15kg: float = 100.0 - s2.stamina
 
 	assert_gt(drain_15kg, drain_5kg, "重いザックほど体力消耗が大きいこと")
 
@@ -151,36 +151,36 @@ func test_BV04_restore_stamina_cannot_exceed_max() -> void:
 
 func test_BV05_stamina_cannot_go_below_zero() -> void:
 	stats.apply_drain(99999.0, 0.0)
-	assert_ge(stats.stamina, 0.0, "体力は0未満にならないこと")
+	assert_gte(stats.stamina, 0.0, "体力は0未満にならないこと")
 
 
 func test_BV05b_hydration_cannot_go_below_zero() -> void:
 	stats.apply_drain(99999.0, 0.0)
-	assert_ge(stats.hydration, 0.0, "水分は0未満にならないこと")
+	assert_gte(stats.hydration, 0.0, "水分は0未満にならないこと")
 
 
 func test_BV06_weight_at_boundary_5kg() -> void:
-	var mult := stats._get_weight_multiplier(5.0)
+	var mult: float = stats._get_weight_multiplier(5.0)
 	assert_eq(mult, 1.0, "5.0kg のとき倍率は1.0")
 
 
 func test_BV07_weight_just_over_5kg() -> void:
-	var mult := stats._get_weight_multiplier(5.001)
+	var mult: float = stats._get_weight_multiplier(5.001)
 	assert_eq(mult, 1.2, "5.001kg のとき倍率は1.2")
 
 
 func test_BV08_slope_at_boundary_10deg() -> void:
-	var mult := stats._get_slope_multiplier(10.0)
+	var mult: float = stats._get_slope_multiplier(10.0)
 	assert_eq(mult, 1.0, "10.0度のとき倍率は1.0")
 
 
 func test_BV09_slope_just_over_10deg() -> void:
-	var mult := stats._get_slope_multiplier(10.001)
+	var mult: float = stats._get_slope_multiplier(10.001)
 	assert_eq(mult, 1.3, "10.001度のとき倍率は1.3")
 
 
 func test_BV10_slope_90deg() -> void:
-	var mult := stats._get_slope_multiplier(90.0)
+	var mult: float = stats._get_slope_multiplier(90.0)
 	assert_eq(mult, 2.2, "90度(崖)のとき倍率は2.2")
 
 
@@ -204,35 +204,35 @@ func test_DU01_8hours_game_time_stays_in_range() -> void:
 		if stats.is_downed:
 			break
 		stats.apply_drain(1.0, 0.0)
-	assert_ge(stats.stamina, 0.0,   "8時間後もstaminaは0以上")
-	assert_le(stats.stamina, 100.0, "8時間後もstaminaは100以下")
-	assert_ge(stats.hydration, 0.0,   "8時間後もhydrationは0以上")
-	assert_le(stats.hydration, 100.0, "8時間後もhydrationは100以下")
+	assert_gte(stats.stamina, 0.0,   "8時間後もstaminaは0以上")
+	assert_lte(stats.stamina, 100.0, "8時間後もstaminaは100以下")
+	assert_gte(stats.hydration, 0.0,   "8時間後もhydrationは0以上")
+	assert_lte(stats.hydration, 100.0, "8時間後もhydrationは100以下")
 
 
-func test_DU02_stamina_reaches_zero_after_dehydration() -> void:
-	## 水分0の状態で長時間 apply_drain すると最終的にstaminaが0になる
-	stats.hydration = 0.0
+func test_DU02_long_walk_eventually_downs_player() -> void:
+	## 補給なしで歩き続けると最終的に体力が尽きてダウンする
 	for _i in range(10000):
-		if stats.stamina <= 0.0:
+		if stats.is_downed:
 			break
 		stats.apply_drain(1.0, 0.0)
-	assert_eq(stats.stamina, 0.0, "脱水状態の長時間経過後にstaminaが0になること")
+	assert_true(stats.is_downed, "補給なしの長時間歩行で最終的にダウンすること")
+	assert_eq(stats.stamina, 0.0, "ダウン時にstaminaが0であること")
 
 
 func test_DU03_tiny_delta_no_underflow() -> void:
 	## 極小 delta で10000回 → 負数にならない
 	for _i in range(10000):
 		stats.apply_drain(0.001, 0.0)
-	assert_ge(stats.stamina, 0.0, "極小delta連続適用後もstaminaは0以上")
-	assert_ge(stats.hydration, 0.0, "極小delta連続適用後もhydrationは0以上")
+	assert_gte(stats.stamina, 0.0, "極小delta連続適用後もstaminaは0以上")
+	assert_gte(stats.hydration, 0.0, "極小delta連続適用後もhydrationは0以上")
 
 
 func test_DU04_huge_delta_no_underflow() -> void:
 	## 極大 delta 1回 → 負数にならない（クランプ保証）
 	stats.apply_drain(10.0, 90.0)
-	assert_ge(stats.stamina, 0.0, "極大deltaでもstaminaは0以上")
-	assert_ge(stats.hydration, 0.0, "極大deltaでもhydrationは0以上")
+	assert_gte(stats.stamina, 0.0, "極大deltaでもstaminaは0以上")
+	assert_gte(stats.hydration, 0.0, "極大deltaでもhydrationは0以上")
 
 
 func test_DU05_repeated_restore_no_overflow() -> void:
@@ -241,3 +241,57 @@ func test_DU05_repeated_restore_no_overflow() -> void:
 	for _i in range(10000):
 		stats.restore_hydration(10.0)
 	assert_eq(stats.hydration, 100.0, "繰り返しrestoreでもhydrationは100を超えない")
+
+
+# ===========================================================================
+# 飲水・休憩・天候テスト (ST12〜 / BV12)
+# ===========================================================================
+
+func test_ST12_drink_restores_hydration_and_consumes_water() -> void:
+	stats.hydration = 50.0
+	var prev_water: float = stats.water_ml
+	var ok: bool = stats.drink()
+	assert_true(ok, "水が残っていればdrinkは成功する")
+	assert_gt(stats.hydration, 50.0, "drink後に水分が回復すること")
+	assert_lt(stats.water_ml, prev_water, "drink後に手持ちの水が減ること")
+
+
+func test_ST13_drink_fails_when_water_empty() -> void:
+	stats.water_ml = 0.0
+	stats.hydration = 50.0
+	var ok: bool = stats.drink()
+	assert_false(ok, "水が尽きていればdrinkは失敗する")
+	assert_eq(stats.hydration, 50.0, "水分は変化しないこと")
+
+
+func test_ST14_resting_recovers_stamina() -> void:
+	stats.stamina = 50.0
+	stats.apply_drain(1.0, 0.0, false)  # 立ち止まり
+	assert_gt(stats.stamina, 50.0, "立ち止まり中は体力が回復すること")
+
+
+func test_ST15_resting_still_drains_hydration() -> void:
+	stats.apply_drain(1.0, 0.0, false)
+	assert_lt(stats.hydration, 100.0, "立ち止まり中も水分は消耗すること")
+
+
+func test_ST16_weather_multiplier_increases_drain() -> void:
+	var s1 = PlayerStatsScript.new()
+	add_child_autofree(s1)
+	s1.apply_drain(1.0, 0.0)
+	var drain_sunny: float = 100.0 - s1.stamina
+
+	var s2 = PlayerStatsScript.new()
+	add_child_autofree(s2)
+	s2.weather_mult = 1.3
+	s2.apply_drain(1.0, 0.0)
+	var drain_rainy: float = 100.0 - s2.stamina
+
+	assert_gt(drain_rainy, drain_sunny, "雨天時は体力消耗が大きいこと")
+
+
+func test_BV12_rest_regen_cannot_exceed_max() -> void:
+	stats.stamina = 99.9
+	for _i in range(100):
+		stats.apply_drain(1.0, 0.0, false)
+	assert_lte(stats.stamina, 100.0, "休憩回復でも体力は100を超えないこと")

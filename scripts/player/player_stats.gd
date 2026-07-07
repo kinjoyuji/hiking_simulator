@@ -36,7 +36,17 @@ const SLOPE_MULTIPLIERS := [
 # 水分不足時の追加体力消耗（水分が低いほど体力消耗が増える）
 const DEHYDRATION_STAMINA_PENALTY := 0.3  # 水分0時に加算される追加消耗/sec
 
-var pack_weight_kg : float = 8.0  # 初期ザック重量
+# 立ち止まり中の回復・消耗（「歩みを止めて息を整える」を再現）
+const REST_STAMINA_REGEN_PER_SEC   := 2.0  # 停止中の体力回復
+const REST_HYDRATION_DRAIN_FACTOR  := 0.3  # 停止中も水分は基礎代謝分消耗する
+
+# 飲水1回あたりの量（手持ちの水は有限。計画フェーズの持水量が上限）
+const DRINK_AMOUNT_ML       := 150.0
+const HYDRATION_PER_100ML   := 10.0
+
+var pack_weight_kg : float = 8.0    # 初期ザック重量
+var water_ml       : float = 1500.0 # 手持ちの水（ml）
+var weather_mult   : float = 1.0    # 天候による消耗倍率（雨・強風で上昇）
 var is_downed      : bool  = false
 
 
@@ -45,25 +55,41 @@ func _ready() -> void:
 	hydration = MAX_HYDRATION
 
 
-func apply_drain(delta: float, slope_degrees: float = 0.0) -> void:
-	"""毎フレーム呼ばれる消耗処理"""
+func apply_drain(delta: float, slope_degrees: float = 0.0, is_moving: bool = true) -> void:
+	"""毎フレーム呼ばれる消耗処理。is_moving=false（立ち止まり）中は体力が回復する"""
 	if is_downed:
 		return
 
-	var weight_mult := _get_weight_multiplier(pack_weight_kg)
-	var slope_mult  := _get_slope_multiplier(abs(slope_degrees))
+	if is_moving:
+		var weight_mult := _get_weight_multiplier(pack_weight_kg)
+		var slope_mult  := _get_slope_multiplier(abs(slope_degrees))
 
-	# 水分消耗
-	var hydration_drain := BASE_HYDRATION_DRAIN_PER_SEC * delta
-	hydration = maxf(hydration - hydration_drain, 0.0)
+		# 水分消耗
+		var hydration_drain := BASE_HYDRATION_DRAIN_PER_SEC * weather_mult * delta
+		hydration = maxf(hydration - hydration_drain, 0.0)
 
-	# 体力消耗（重量・勾配・水分不足を考慮）
-	var dehydration_penalty := DEHYDRATION_STAMINA_PENALTY * (1.0 - hydration / MAX_HYDRATION)
-	var stamina_drain := (BASE_STAMINA_DRAIN_PER_SEC * weight_mult * slope_mult + dehydration_penalty) * delta
-	stamina = maxf(stamina - stamina_drain, 0.0)
+		# 体力消耗（重量・勾配・天候・水分不足を考慮）
+		var dehydration_penalty := DEHYDRATION_STAMINA_PENALTY * (1.0 - hydration / MAX_HYDRATION)
+		var stamina_drain := (BASE_STAMINA_DRAIN_PER_SEC * weight_mult * slope_mult * weather_mult + dehydration_penalty) * delta
+		stamina = maxf(stamina - stamina_drain, 0.0)
+	else:
+		# 立ち止まり: 息を整えて体力回復。水分は基礎代謝分だけ消耗
+		hydration = maxf(hydration - BASE_HYDRATION_DRAIN_PER_SEC * REST_HYDRATION_DRAIN_FACTOR * delta, 0.0)
+		var regen_scale := 0.3 + 0.7 * (hydration / MAX_HYDRATION)  # 脱水気味だと回復が鈍る
+		stamina = minf(stamina + REST_STAMINA_REGEN_PER_SEC * regen_scale * delta, MAX_STAMINA)
 
 	stats_changed.emit()
 	_check_downed()
+
+
+func drink() -> bool:
+	"""手持ちの水を一口飲む。水が尽きていれば false"""
+	if is_downed or water_ml <= 0.0:
+		return false
+	var amount := minf(DRINK_AMOUNT_ML, water_ml)
+	water_ml -= amount
+	restore_hydration(amount / 100.0 * HYDRATION_PER_100ML)
+	return true
 
 
 func restore_hydration(amount: float) -> void:

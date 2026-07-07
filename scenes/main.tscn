@@ -1,113 +1,290 @@
-[gd_scene format=3 uid="uid://jh7rnyw1dfyj"]
+[gd_scene load_steps=11 format=3 uid="uid://jh7rnyw1dfyj"]
 
-[ext_resource type="Script" uid="uid://cmh83cq1ilbdv" path="res://scripts/main.gd" id="1_tbgi4"]
-[ext_resource type="Script" uid="uid://ch4wo6bkcira4" path="res://scripts/ui/hud.gd" id="2_tefeu"]
-[ext_resource type="Script" uid="uid://dd5vbnka8a8ms" path="res://scripts/player/player.gd" id="3_o6xl0"]
-[ext_resource type="Script" uid="uid://bd7pxim5wde3i" path="res://scripts/player/player_stats.gd" id="4_tipki"]
-[ext_resource type="Script" uid="uid://dcnd4mby6vbs1" path="res://scripts/terrain/terrain_generator.gd" id="5_tbgi4"]
+[ext_resource type="Script" uid="uid://4t14rhbv801c" path="res://scripts/main.gd" id="1_tbgi4"]
+[ext_resource type="AudioStream" path="res://assets/audio/wind_loop.wav" id="6_wind"]
+[ext_resource type="Script" uid="uid://ctwpjxg3l3o8q" path="res://scripts/ui/hud.gd" id="2_tefeu"]
+[ext_resource type="Script" uid="uid://bld6b7c7j07dr" path="res://scripts/player/player.gd" id="3_o6xl0"]
+[ext_resource type="Script" uid="uid://dvpo31g7baebg" path="res://scripts/player/player_stats.gd" id="4_tipki"]
+[ext_resource type="Script" uid="uid://clsd6c8o0xgrd" path="res://scripts/terrain/terrain_generator.gd" id="5_tbgi4"]
 
-[node name="Main" type="Node" unique_id=259921773]
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat_1"]
+sky_top_color = Color(0.25, 0.45, 0.75, 1)
+sky_horizon_color = Color(0.72, 0.78, 0.85, 1)
+ground_horizon_color = Color(0.65, 0.7, 0.72, 1)
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("SkyMat_1")
+
+[sub_resource type="Environment" id="Env_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+tonemap_mode = 2
+
+[sub_resource type="CapsuleShape3D" id="PlayerCapsule_1"]
+radius = 0.4
+height = 1.8
+
+[node name="Main" type="Node"]
 script = ExtResource("1_tbgi4")
 
-[node name="HUD" type="CanvasLayer" parent="." unique_id=1384634494]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.872665, -0.523599, 0)
+shadow_enabled = true
+
+[node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("2_tefeu")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HUD" unique_id=1544846709]
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="StatsBox" type="VBoxContainer" parent="HUD"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 320.0
+offset_bottom = 120.0
 
-[node name="StaminaRow" type="HBoxContainer" parent="HUD/VBoxContainer" unique_id=795167153]
+[node name="StaminaRow" type="HBoxContainer" parent="HUD/StatsBox"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HUD/VBoxContainer/StaminaRow" unique_id=1383997420]
+[node name="Label" type="Label" parent="HUD/StatsBox/StaminaRow"]
+custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 text = "体力"
 
-[node name="StaminaBar" type="ProgressBar" parent="HUD/VBoxContainer/StaminaRow" unique_id=504727664]
+[node name="StaminaBar" type="ProgressBar" parent="HUD/StatsBox/StaminaRow"]
+custom_minimum_size = Vector2(220, 22)
 layout_mode = 2
 value = 100.0
 
-[node name="HydrationRow" type="HBoxContainer" parent="HUD/VBoxContainer" unique_id=1562467412]
+[node name="HydrationRow" type="HBoxContainer" parent="HUD/StatsBox"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HUD/VBoxContainer/HydrationRow" unique_id=1613966246]
+[node name="Label" type="Label" parent="HUD/StatsBox/HydrationRow"]
+custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 text = "水分"
 
-[node name="HydrationBar" type="ProgressBar" parent="HUD/VBoxContainer/HydrationRow" unique_id=1765827482]
+[node name="HydrationBar" type="ProgressBar" parent="HUD/StatsBox/HydrationRow"]
+custom_minimum_size = Vector2(220, 22)
 layout_mode = 2
 value = 100.0
 
-[node name="WarningLabel" type="Label" parent="HUD" unique_id=2025915369]
-offset_top = 27.0
-offset_right = 32.0
-offset_bottom = 50.0
+[node name="WaterLabel" type="Label" parent="HUD/StatsBox"]
+layout_mode = 2
+text = "残りの水: 1500ml (Eで飲む)"
 
-[node name="TimeLabel" type="Label" parent="HUD" unique_id=1498987314]
-offset_top = 54.0
-offset_right = 32.0
-offset_bottom = 77.0
+[node name="InfoBox" type="VBoxContainer" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 140.0
+grow_horizontal = 0
+
+[node name="TimeLabel" type="Label" parent="HUD/InfoBox"]
+layout_mode = 2
 text = "06:00"
+horizontal_alignment = 2
 
-[node name="Player" type="CharacterBody3D" parent="." unique_id=20241927]
-script = ExtResource("3_o6xl0")
+[node name="ElevationLabel" type="Label" parent="HUD/InfoBox"]
+layout_mode = 2
+text = "標高 ---m"
+horizontal_alignment = 2
 
-[node name="PlayerStats" type="Node" parent="Player" unique_id=1603626587]
-script = ExtResource("4_tipki")
+[node name="WeatherLabel" type="Label" parent="HUD/InfoBox"]
+layout_mode = 2
+text = "天候: 晴れ"
+horizontal_alignment = 2
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=460238899]
+[node name="GoalLabel" type="Label" parent="HUD/InfoBox"]
+layout_mode = 2
+text = "山頂まで ---m"
+horizontal_alignment = 2
 
-[node name="CameraPivot" type="Node3D" parent="Player" unique_id=621228350]
+[node name="WarningLabel" type="Label" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -80.0
+offset_right = 300.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.35, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
 
-[node name="Camera3D" type="Camera3D" parent="Player/CameraPivot" unique_id=1629720591]
+[node name="MessageLabel" type="Label" parent="HUD"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 60.0
+offset_right = 300.0
+offset_bottom = 90.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
 
-[node name="SlopeCast" type="RayCast3D" parent="Player" unique_id=1034746741]
-target_position = Vector3(0, -1.2, 0)
-
-[node name="TerrainGenerator" type="Node3D" parent="." unique_id=1762648925]
-script = ExtResource("5_tbgi4")
-
-[node name="ResultPanel" type="Control" parent="." unique_id=650648112]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="TitleLabel" type="Label" parent="ResultPanel" unique_id=406162075]
-layout_mode = 0
-text = "タイトル"
-
-[node name="ReasonLabel" type="Label" parent="ResultPanel" unique_id=1232734604]
-layout_mode = 0
-offset_right = 32.0
-offset_bottom = 23.0
-text = "理由"
-
-[node name="AdviceLabel" type="Label" parent="ResultPanel" unique_id=2138400413]
-layout_mode = 0
-offset_right = 32.0
-offset_bottom = 23.0
-text = "アドバイス"
-
-[node name="PlanningPanel" type="Control" parent="." unique_id=1397981173]
-layout_mode = 3
+[node name="StatusLabel" type="Label" parent="HUD"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -100.0
-offset_right = 150.0
-offset_bottom = 100.0
+offset_left = -200.0
+offset_top = -20.0
+offset_right = 200.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
 
-[node name="StartButton" type="Button" parent="PlanningPanel" unique_id=1007122665]
-layout_mode = 0
-offset_left = 75.0
-offset_top = 120.0
-offset_right = 225.0
-offset_bottom = 160.0
+[node name="Player" type="CharacterBody3D" parent="."]
+script = ExtResource("3_o6xl0")
+
+[node name="PlayerStats" type="Node" parent="Player"]
+script = ExtResource("4_tipki")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("PlayerCapsule_1")
+
+[node name="CameraPivot" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Player/CameraPivot"]
+far = 2000.0
+
+[node name="SlopeCast" type="RayCast3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+target_position = Vector3(0, -2, 0)
+
+[node name="TerrainGenerator" type="Node3D" parent="."]
+script = ExtResource("5_tbgi4")
+
+[node name="WindPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_wind")
+volume_db = -12.0
+
+[node name="ResultPanel" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="ResultPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="CenterContainer" type="CenterContainer" parent="ResultPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="ResultPanel/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="ResultPanel/CenterContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "タイトル"
+horizontal_alignment = 1
+
+[node name="ReasonLabel" type="Label" parent="ResultPanel/CenterContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "理由"
+horizontal_alignment = 1
+
+[node name="AdviceLabel" type="Label" parent="ResultPanel/CenterContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+text = "アドバイス"
+horizontal_alignment = 1
+
+[node name="RetryButton" type="Button" parent="ResultPanel/CenterContainer/VBox"]
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "もう一度挑戦する"
+
+[node name="PlanningPanel" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="PlanningPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.12, 0.18, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="PlanningPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="PlanningPanel/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="PlanTitleLabel" type="Label" parent="PlanningPanel/CenterContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "登山計画"
+horizontal_alignment = 1
+
+[node name="CourseLabel" type="Label" parent="PlanningPanel/CenterContainer/VBox"]
+layout_mode = 2
+text = "コース: 入門・高尾山エリア（実地形データ）
+目標: 山頂の赤い標柱に到達する
+装備: ザック 8kg / 水 1500ml"
+horizontal_alignment = 1
+
+[node name="ControlsLabel" type="Label" parent="PlanningPanel/CenterContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
+text = "操作: WASD 移動 / マウス 視点 / E 水を飲む / ESC マウス解放
+立ち止まると呼吸が整い、体力が回復します"
+horizontal_alignment = 1
+
+[node name="StartButton" type="Button" parent="PlanningPanel/CenterContainer/VBox"]
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+size_flags_horizontal = 4
 text = "出発する"
 
-[connection signal="pressed" from="PlanningPanel/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="PlanningPanel/CenterContainer/VBox/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="ResultPanel/CenterContainer/VBox/RetryButton" to="." method="_on_retry_button_pressed"]
