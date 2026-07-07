@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var elevation_label : Label = $InfoBox/ElevationLabel
 @onready var weather_label   : Label = $InfoBox/WeatherLabel
 @onready var goal_label      : Label = $InfoBox/GoalLabel
+@onready var help_panel      : PanelContainer = $HelpPanel
 
 var _player_stats : Node = null
 var _player : Node3D = null
@@ -28,6 +29,11 @@ func _ready() -> void:
 	message_label.visible = false
 	status_label.visible = false
 	_update_time_label()
+
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_help"):
+		help_panel.visible = not help_panel.visible
 
 
 func _process(delta: float) -> void:

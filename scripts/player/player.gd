@@ -4,6 +4,9 @@ extends CharacterBody3D
 const WALK_SPEED    := 3.0   # 平地歩行速度 (m/s)
 const GRAVITY       := 9.8
 const MOUSE_SENSITIVITY := 0.002
+# キーボード視点操作（マウスキャプチャが効かない環境=WSLg等でも360°見渡せるように）
+const KEY_LOOK_SPEED_H  := 2.0   # rad/s（左右）
+const KEY_LOOK_SPEED_V  := 1.2   # rad/s（上下）
 
 @onready var stats        : Node      = $PlayerStats
 @onready var camera_pivot : Node3D    = $CameraPivot
@@ -25,6 +28,7 @@ func _physics_process(delta: float) -> void:
 
 	_apply_gravity(delta)
 	var is_moving := _handle_movement()
+	_handle_key_look(delta)
 	_update_slope()
 
 	if Input.is_action_just_pressed("drink"):
@@ -54,6 +58,16 @@ func _handle_movement() -> bool:
 	velocity.x = move_toward(velocity.x, 0, WALK_SPEED)
 	velocity.z = move_toward(velocity.z, 0, WALK_SPEED)
 	return false
+
+
+func _handle_key_look(delta: float) -> void:
+	"""矢印キーでの視点操作。マウスと併用可能"""
+	var look := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	if look == Vector2.ZERO:
+		return
+	rotate_y(-look.x * KEY_LOOK_SPEED_H * delta)
+	camera_pivot.rotate_x(-look.y * KEY_LOOK_SPEED_V * delta)
+	camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, -PI / 3, PI / 3)
 
 
 func _apply_gravity(delta: float) -> void:

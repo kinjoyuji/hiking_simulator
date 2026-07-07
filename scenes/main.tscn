@@ -147,6 +147,47 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 
+[node name="HelpHint" type="Label" parent="HUD"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -36.0
+offset_right = 300.0
+offset_bottom = -12.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 0.55)
+text = "H: 操作ヘルプ"
+
+[node name="HelpPanel" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = -48.0
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="HUD/HelpPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="HelpText" type="Label" parent="HUD/HelpPanel/Margin"]
+layout_mode = 2
+text = "【操作方法】
+W / A / S / D … 歩く
+マウス … 周りを見渡す
+矢印キー … 視点を回す（360°）
+E … 水を飲む
+立ち止まる … 休憩して体力回復
+ESC … マウス解放（クリックで戻る）
+H … このヘルプを閉じる"
+
 [node name="Player" type="CharacterBody3D" parent="."]
 script = ExtResource("3_o6xl0")
 
@@ -276,7 +317,7 @@ horizontal_alignment = 1
 [node name="ControlsLabel" type="Label" parent="PlanningPanel/CenterContainer/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.75, 0.8, 1)
-text = "操作: WASD 移動 / マウス 視点 / E 水を飲む / ESC マウス解放
+text = "操作: WASD 移動 / マウス・矢印キー 視点 / E 水を飲む / H ヘルプ
 立ち止まると呼吸が整い、体力が回復します"
 horizontal_alignment = 1
 
