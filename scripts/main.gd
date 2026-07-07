@@ -22,6 +22,7 @@ const WEATHER_EVENT_MAX_SEC := 150.0
 const RAIN_DRAIN_MULT       := 1.3
 
 var current_state : GameState = GameState.PLANNING
+var _terrain_requested := false  # 多重クリックでの地形・ゴール・タイマー二重生成を防ぐ
 
 @onready var hud               : CanvasLayer = $HUD
 @onready var player            : CharacterBody3D = $Player
@@ -59,6 +60,10 @@ func _start_planning_phase() -> void:
 
 func start_hiking() -> void:
 	"""計画フェーズ完了 → 地形取得 → 行動フェーズ開始"""
+	if current_state != GameState.PLANNING or _terrain_requested:
+		return
+	_terrain_requested = true
+
 	planning_panel.visible = false
 	hud.set_status("地形データを取得中…")
 
@@ -87,6 +92,8 @@ func _on_terrain_ready(info: Dictionary) -> void:
 
 func on_player_downed(reason: String) -> void:
 	"""PlayerからGameOverを受け取る"""
+	if current_state != GameState.HIKING:
+		return
 	_show_result("行動不能", reason, _get_advice(reason))
 
 
@@ -105,6 +112,7 @@ func _show_result(title: String, reason: String, advice: String) -> void:
 	current_state = GameState.RESULT
 	hud.set_clock_running(false)
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	player.set_physics_process(false)
 	result_panel.visible = true
 	result_panel.get_node("%TitleLabel").text = title
 	result_panel.get_node("%ReasonLabel").text = reason
@@ -155,9 +163,12 @@ func _start_wind_ambience() -> void:
 	var wind_player: AudioStreamPlayer = $WindPlayer
 	var stream := wind_player.stream as AudioStreamWAV
 	if stream:
+		# インポート済みリソースは他ノードと共有されているため、複製してから変更する
+		stream = stream.duplicate()
 		# WAV自体にループチャンクを持たせていないため、ここでループ指定する
 		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 		stream.loop_end = stream.data.size() / 2  # 16bitモノラル: 2バイト=1フレーム
+		wind_player.stream = stream
 	wind_player.play()
 
 
@@ -166,8 +177,14 @@ func _start_wind_ambience() -> void:
 # ---------------------------------------------------------------------------
 
 func _schedule_weather_event() -> void:
-	var delay := randf_range(WEATHER_EVENT_MIN_SEC, WEATHER_EVENT_MAX_SEC)
-	get_tree().create_timer(delay).timeout.connect(_on_weather_changed)
+	# SceneTreeTimerはシーン再読み込みを跨いで生き残り、破棄済みインスタンスへ
+	# コールバックしてしまうため、selfの子Timerにして再読み込み時に確実に破棄させる
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.wait_time = randf_range(WEATHER_EVENT_MIN_SEC, WEATHER_EVENT_MAX_SEC)
+	timer.timeout.connect(_on_weather_changed)
+	add_child(timer)
+	timer.start()
 
 
 func _on_weather_changed() -> void:

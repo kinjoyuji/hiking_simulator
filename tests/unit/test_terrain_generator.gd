@@ -71,9 +71,7 @@ func test_TG12_parse_csv_skip_empty_lines() -> void:
 	## 空行はスキップされる
 	var csv := "1.0,2.0\n\n3.0,4.0"
 	var result: Array = gen._parse_csv(csv)
-	## 空行は空配列として扱われるため、sizeが2または3かを確認
-	## （実装詳細に合わせて調整）
-	assert_gte(result.size(), 2, "有効行は少なくとも2行")
+	assert_eq(result.size(), 2, "空行はスキップされ有効2行のみ")
 
 
 func test_TG13_parse_empty_string() -> void:

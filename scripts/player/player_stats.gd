@@ -115,10 +115,12 @@ func get_hydration_ratio() -> float:
 # --- private ---
 
 func _check_downed() -> void:
-	if stamina <= 0.0:
-		_trigger_downed("体力が尽きた。動けない。")
-	elif hydration <= 0.0:
+	# 同一フレームで両方0になった場合、脱水は医学的に体力消耗より優先度の高い
+	# 原因のため、脱水の教育的アドバイスを優先して表示する
+	if hydration <= 0.0:
 		_trigger_downed("重度の脱水状態。意識が遠のく。")
+	elif stamina <= 0.0:
+		_trigger_downed("体力が尽きた。動けない。")
 
 
 func _trigger_downed(reason: String) -> void:

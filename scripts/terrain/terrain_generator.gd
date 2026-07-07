@@ -31,6 +31,10 @@ var _http_request : HTTPRequest
 func _ready() -> void:
 	_http_request = HTTPRequest.new()
 	add_child(_http_request)
+	# タイムアウト無指定だと通信不能時に「地形データを取得中…」のまま無限に
+	# 待ち続けてしまう。RESULT_TIMEOUTとして_on_request_completedに届かせ、
+	# 既存のフォールバック経路へ合流させる
+	_http_request.timeout = 10.0
 	_http_request.request_completed.connect(_on_request_completed)
 
 
@@ -93,6 +97,10 @@ func _build_terrain(elevation_data: Array, is_fallback: bool) -> void:
 			if is_lower and _cell_slope_deg(elevation_data, col, row) <= SPAWN_MAX_SLOPE_DEG:
 				min_cell = Vector2i(col, row)
 				found_flat = true
+	if not found_flat:
+		# 平坦なセルが見つからず急斜面セルをそのまま使う（slope制約なしのフォールバック）。
+		# ゲーム続行は可能だが、スポーン地点が急斜面になり得るため警告で可視化する
+		push_warning("平坦な登山口が見つからないため急斜面セルを使用: slope制約なし")
 
 	var surface_tool := SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -304,6 +312,12 @@ func _on_request_completed(result: int, response_code: int, _headers: PackedStri
 
 	var csv_text := body.get_string_from_utf8()
 	var elevation_data := _parse_csv(csv_text)
+	if elevation_data.size() < 2 or elevation_data[0].size() < 2:
+		# 不正な200レスポンス（データ不足）をそのまま_build_terrainへ渡すと
+		# push_errorのみでterrain_readyが発火せず、ロード画面で詰む
+		push_warning("標高データの形式が不正なため代替地形を生成します: rows=%d" % elevation_data.size())
+		_generate_fallback_terrain()
+		return
 	_build_terrain(elevation_data, false)
 
 

@@ -19,6 +19,7 @@ var _summit_position := Vector3.ZERO
 var _base_elevation : float = 0.0
 var _max_elevation : float = 0.0
 var _clock_running := false
+var _message_tween : Tween = null
 
 var _game_time_sec : float = 6.0 * 3600.0  # ゲーム内時刻。朝6時出発
 const GAME_TIME_SCALE := 60.0              # 現実1秒 = ゲーム内60秒（1分）
@@ -63,11 +64,15 @@ func set_status(msg: String) -> void:
 
 func show_message(msg: String, duration_sec: float = 4.0) -> void:
 	"""一定時間で消えるイベントメッセージ"""
+	# 前のメッセージのhideコールバックが新しいメッセージを消してしまわないよう、
+	# 古いtweenは先に破棄する
+	if _message_tween and _message_tween.is_valid():
+		_message_tween.kill()
 	message_label.text = msg
 	message_label.visible = true
-	var tween := create_tween()
-	tween.tween_interval(duration_sec)
-	tween.tween_callback(func() -> void: message_label.visible = false)
+	_message_tween = create_tween()
+	_message_tween.tween_interval(duration_sec)
+	_message_tween.tween_callback(func() -> void: message_label.visible = false)
 
 
 func set_clock_running(running: bool) -> void:

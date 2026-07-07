@@ -64,6 +64,7 @@ func _run() -> void:
 		await physics_frame
 	_check(scene.current_state == scene.GameState.RESULT, "山頂到達でRESULTになる")
 	_check(scene.get_node("ResultPanel").visible, "リザルトパネルが表示される")
+	_check(scene.get_node("ResultPanel").get_node("%TitleLabel").text == "登頂成功！", "リザルトが登頂成功であること")
 
 	if _failures == 0:
 		print("SMOKE TEST: ALL PASSED")
