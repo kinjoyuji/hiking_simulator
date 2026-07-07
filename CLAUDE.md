@@ -67,7 +67,7 @@ GameManager (scripts/main.gd)
 
 ### PlayerStats の消耗計算
 
-歩行中の体力消耗は `BASE_STAMINA_DRAIN × weight_mult × slope_mult × weather_mult + dehydration_penalty`。立ち止まり中（`apply_drain(..., is_moving=false)`）は体力が回復し、水分のみ基礎代謝分消耗する。倍率テーブルは定数として `player_stats.gd` に定義されており、変更時はテスト `tests/unit/test_player_stats.gd` の境界値テスト (BV-06〜10) も合わせて更新が必要。
+歩行中の体力消耗は `BASE_STAMINA_DRAIN_PER_SEC × weight_mult × slope_mult × weather_mult + dehydration_penalty`。立ち止まり中（`apply_drain(..., is_moving=false)`）は体力が回復し、水分のみ基礎代謝分消耗する。倍率テーブルは定数として `player_stats.gd` に定義されており、変更時はテスト `tests/unit/test_player_stats.gd` の境界値テスト (BV-06〜10) も合わせて更新が必要。
 
 ### TerrainGenerator の地形生成パイプライン
 
