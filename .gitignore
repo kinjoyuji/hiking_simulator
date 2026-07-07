@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 .pytest_cache/
+.vscode
 
 # Godot
 .godot/
@@ -12,3 +13,6 @@ export_presets.cfg
 # OS
 .DS_Store
 Thumbs.db
+
+# IDE
+.vscode/
