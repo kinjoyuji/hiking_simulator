@@ -10,10 +10,11 @@
 
 | ツール | バージョン | 用途 |
 |--------|-----------|------|
-| [Godot 4](https://godotengine.org/download/) | 4.3 以上 | ゲーム本体の起動・編集 |
-| [GUT プラグイン](https://github.com/bitwes/Gut) | 9.x (Godot 4対応) | GDScript の単体テスト |
-| Python | 3.11 以上 | 標高APIツール・Pythonテスト |
+| [Godot 4](https://godotengine.org/download/) | 4.6 以上 | ゲーム本体の起動・編集 |
+| Python | 3.11 以上 | 標高APIツール・環境音生成・Pythonテスト |
 | pip パッケージ: `requests`, `pytest` | 最新 | APIアクセス・テスト実行 |
+
+GUT プラグイン（GDScriptテスト）と Noto Sans JP フォントはリポジトリに同梱済み。
 
 ---
 
@@ -38,28 +39,36 @@ pip install requests pytest
 2. 「インポート」→ このリポジトリの `project.godot` を選択
 3. プロジェクトが開く
 
-### 4. GUT プラグインを導入（GDScript テスト用）
-
-1. Godot エディタ上で **AssetLib** を開く
-2. 「GUT」で検索してインストール
-3. **Project → Project Settings → Plugins** で GUT を **Enable** にする
-
-または、GitHubから直接取得する場合:
+CLI の場合（Linux/WSL）:
 
 ```bash
-# addons/ ディレクトリに GUT を配置
-mkdir -p addons
-cd addons
-git clone https://github.com/bitwes/Gut.git gut
+# Godot 4.6 バイナリを取得して ~/.local/bin/godot に配置した想定
+godot --headless --import   # 初回インポート
+godot                        # エディタ起動
 ```
 
 ---
 
 ## ゲームの起動
 
-Godot エディタで `F5`（または再生ボタン）を押すと起動します。
+Godot エディタで `F5`（または再生ボタン）を押すと起動します。メインシーンは `scenes/main.tscn` です。
 
-メインシーンは `scenes/main.tscn` です（シーンファイルは今後作成予定）。
+### 遊び方（MVP: 入門・高尾山コース）
+
+1. 「登山計画」画面で内容を確認して **出発する**
+2. 国土地理院の実標高データから山が生成され、登山口にスポーンする
+   （オフライン時は自動的に仮想の山になる）
+3. 山頂に立つ**赤い標柱**を目指して歩く
+4. 体力・水分に注意。山行中に**雨が降ると消耗が加速**する
+5. 山頂到達で登頂成功。体力か水分が尽きると行動不能（教育的フィードバック表示）
+
+| 操作 | 内容 |
+|------|------|
+| WASD | 移動 |
+| マウス | 視点 |
+| E | 水を飲む（手持ち1500ml） |
+| 立ち止まる | 呼吸を整えて体力回復 |
+| ESC / クリック | マウス解放 / 再キャプチャ |
 
 ---
 
@@ -100,7 +109,7 @@ tests/tools/test_fetch_elevation.py::TestFetchElevationMock::test_PY12_404_...  
 
 ```bash
 godot --headless -s addons/gut/gut_cmdln.gd \
-  -gdir=tests/ \
+  -gdir=tests/unit \
   -gprefix=test_ \
   -gsuffix=.gd \
   -gexit
@@ -110,8 +119,16 @@ godot --headless -s addons/gut/gut_cmdln.gd \
 
 | ファイル | ケース数 | 内容 |
 |----------|---------|------|
-| `tests/unit/test_player_stats.gd` | 27 | 体力・水分パラメータ管理 |
-| `tests/unit/test_terrain_generator.gd` | 9 | 座標変換・CSVパース |
+| `tests/unit/test_player_stats.gd` | 34 | 体力・水分・飲水・休憩・天候 |
+| `tests/unit/test_terrain_generator.gd` | 10 | 座標変換・CSVパース |
+
+### スモークテスト（ゲームループ一気通貫）
+
+メインシーンを実際に起動し、地形生成 → スポーン → 消耗 → 飲水 → 登頂までを自動検証します。
+
+```bash
+godot --headless -s tests/smoke/smoke_main.gd
+```
 
 ---
 
@@ -155,27 +172,30 @@ python3 tools/fetch_elevation.py --lat 35.3606 --lon 138.7274 --zoom 14
 ```
 hiking_simulator/
 ├── project.godot                      # Godot 4 プロジェクト設定
-├── scenes/                            # シーンファイル (.tscn) ※作成予定
-│   ├── player/
-│   ├── terrain/
-│   └── ui/
+├── scenes/
+│   └── main.tscn                      # メインシーン（HUD/Player/地形/パネル）
 ├── scripts/                           # GDScript
-│   ├── main.gd                        # GameManager（フェーズ管理）
+│   ├── main.gd                        # GameManager（フェーズ管理・ゴール・天候）
 │   ├── player/
-│   │   ├── player.gd                  # 移動・勾配検出
-│   │   └── player_stats.gd            # 体力・水分パラメータ管理
+│   │   ├── player.gd                  # 移動・勾配検出・飲水入力
+│   │   └── player_stats.gd            # 体力・水分・飲水・休憩回復
 │   ├── terrain/
-│   │   └── terrain_generator.gd       # 国土地理院API → 3Dメッシュ生成
+│   │   └── terrain_generator.gd       # 国土地理院API → 3Dメッシュ + 木/岩散布
 │   └── ui/
-│       └── hud.gd                     # HUD（バー・時刻・警告表示）
+│       └── hud.gd                     # HUD（バー・時刻・標高・警告・メッセージ）
+├── assets/
+│   ├── audio/wind_loop.wav            # 風の環境音（tools/generate_ambient.py で生成）
+│   └── fonts/NotoSansJP.ttf           # 日本語フォント（OFL）
 ├── docs/
 │   ├── design/                        # モジュール設計書
 │   └── test/                          # テスト設計書
 ├── tests/
 │   ├── unit/                          # GUT 単体テスト (.gd)
+│   ├── smoke/                         # ヘッドレス・スモークテスト
 │   └── tools/                         # Python テスト
 ├── tools/
-│   └── fetch_elevation.py             # 標高API検証ツール
+│   ├── fetch_elevation.py             # 標高API検証ツール
+│   └── generate_ambient.py            # 環境音（風）合成ツール
 ├── GAME_DESIGN.md                     # ゲームデザインドキュメント
 └── pytest.ini                         # pytest 設定
 ```
