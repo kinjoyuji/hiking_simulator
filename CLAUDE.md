@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 開発ブランチ
 
-作業ブランチ: `claude/hiking-simulator-concept-mz6rO`
+作業ブランチ: `claude/mountain-experience-design-d4a9w3`
 変更は必ずこのブランチにコミット・プッシュすること。
 
 ## よく使うコマンド
@@ -92,12 +92,21 @@ GameManager (scripts/main.gd)
 
 詳細は `docs/test/test_design.md` を参照。
 
-## 将来フェーズで追加予定の機能
+## フェーズ2: クオリティアップ（計画済み）
 
-MVP（現在）は体力・水分の2パラメータ + 飲水・立ち止まり休憩・雨イベントまで。以下はフェーズ2以降の予定であり、現時点では実装しないこと:
+体験品質向上（遠景の稜線・樹林帯の質感・環境音の重層化）の計画は以下の資料に従うこと:
+
+- ロードマップ: `docs/roadmap/quality_up_roadmap.md`（マイルストーン M1〜M5・技術スタック方針・性能予算）
+- 設計書: `docs/design/vista_and_atmosphere_design.md`（フォグ・空・マルチタイル遠景）
+- 設計書: `docs/design/forest_experience_design.md`（植生帯・樹木LOD・登山道・地面シェーダー）
+- 設計書: `docs/design/ambient_audio_design.md`（バス構成・音レイヤー・素材合成パイプライン）
+
+実装時はまず該当設計書を読み、設計変更が必要なら設計書を先に更新する。
+
+## 将来フェーズで追加予定の機能（フェーズ3以降・現時点では実装しないこと）
 
 - パラメータ: 空腹・体温・バッテリー残量
 - 行動種別: 走行・クライミング
-- 地形: テクスチャ・LOD・ストリーミング隣接タイル・プロップの当たり判定
 - イベント: 雷・ホワイトアウト・道迷い・転倒・救助要請
 - `is_downed` の解除（現在は不可）
+- 川・湖の水面メッシュ、雪山（マルチシーズン）
